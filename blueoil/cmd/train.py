@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # =============================================================================
+import click
 from datetime import datetime
 import math
 import os
@@ -280,6 +281,21 @@ def run(config_file, experiment_id, recreate):
     start_training(config)
 
 
+@click.command(context_settings=dict(help_option_names=['-h', '--help']))
+@click.option(
+    "-c",
+    "--config_file",
+    help="config file path for this training",
+    default=os.path.join("configs", "example", "classification.py"),
+    required=True,
+)
+@click.option(
+    "-i",
+    "--experiment_id",
+    help="id of this training",
+    default="experiment",
+    required=True,
+)
 def train(config_file, experiment_id=None, recreate=False):
     if not experiment_id:
         # Default model_name will be taken from config file: {model_name}.yml.
@@ -300,3 +316,6 @@ def train(config_file, experiment_id=None, recreate=False):
     checkpoint_name = os.path.basename(data['model_checkpoint_path'])
 
     return experiment_id, checkpoint_name
+
+if __name__ == '__main__':
+    train()

@@ -34,7 +34,8 @@ def get_image(filename, convert_rgb=True, ignore_class_idx=None):
         image = np.array(image)
     else:
         image = image.convert("L")
-        image = np.array(image)
+        image_bw = image.point(lambda x: 0 if x < 128 else 255, '1')
+        image = np.array(image_bw) 
         if ignore_class_idx is not None:
             # Replace ignore labelled class with enough large value
             image = np.where(image == ignore_class_idx, 255, image)
@@ -58,7 +59,7 @@ class CrackBase(SegmentationBase):
             **kwargs,
         )
 
-    extend_dir = ""
+    extend_dir = None
     ignore_class_idx = None
 
     @property
@@ -112,7 +113,8 @@ class DeepCrack(CrackBase):
     NUM_EXAMPLES_PER_EPOCH_FOR_TEST = 237
 
     classes = [
-        "crack",
+        "background",
+        "crack"
     ]
     num_classes = len(classes)
 
@@ -131,11 +133,10 @@ class DeepCrack(CrackBase):
 
     @property
     def label_colors(self):
-        crack = [192, 192, 128]
+        crack = [128, 128, 128]
+        background = [192, 192, 128]
 
-        label_colors = np.array([
-            crack
-        ])
+        label_colors = np.array([background, crack])
 
         return label_colors
 

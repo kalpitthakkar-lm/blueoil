@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # =============================================================================
+from matplotlib import cm
 import tensorflow as tf
 
 from blueoil.common import get_color_map
@@ -72,6 +73,33 @@ class Base(BaseNetwork):
 
         labels = self._color_labels(labels, name="labels_color")
 
+    def _summary_heatmaps(self, target_feature_map):
+        assert target_feature_map.get_shape()[3].value == self.num_classes
+
+        results = []
+
+        # shape: [batch_size, height, width, num_classes]
+        heatmap = tf.image.resize(
+            target_feature_map, [self.image_size[0], self.image_size[1]],
+            method=tf.image.ResizeMethod.BICUBIC,
+        )
+        epsilon = 1e-10
+        # standrization. all element are in the interval [0, 1].
+        heatmap = (heatmap - tf.reduce_min(heatmap)) / (tf.reduce_max(heatmap) - tf.reduce_min(heatmap) + epsilon)
+
+        for i, class_name in enumerate(self.classes):
+            class_heatmap = heatmap[:, :, :, i]
+            indices = tf.cast(tf.round(class_heatmap * 255), tf.int32)
+            color_map = cm.jet
+            # Init color map for useing color lookup table(_lut).
+            color_map._init()
+            colors = tf.constant(color_map._lut[:, :3], dtype=tf.float32)
+            # gather
+            colored_class_heatmap = tf.gather(colors, indices)
+            results.append(colored_class_heatmap)
+
+        return results
+
     def summary(self, output, labels=None):
         output_transposed = output if self.data_format == 'NHWC' else tf.transpose(output, perm=[0, 2, 3, 1])
         images = self.images if self.data_format == 'NHWC' else tf.transpose(self.images, perm=[0, 2, 3, 1])
@@ -85,6 +113,15 @@ class Base(BaseNetwork):
         overlap_output_input = 0.5 * reversed_image + tf.cast(output_images, tf.float32)
 
         tf.summary.image('overlap_output_input', overlap_output_input)
+        
+        if hasattr(self, "_heatmap_layer") and isinstance(self._heatmap_layer, tf.Tensor):
+            heatmap_layer = self._heatmap_layer if self.data_format == 'NHWC' else tf.transpose(self._heatmap_layer, perm=[0, 2, 3, 1])
+            with tf.compat.v1.variable_scope('heatmap'):
+                colored_class_heatmaps = self._summary_heatmaps(heatmap_layer)
+                for class_name, colored_class_heatmap in zip(self.classes, colored_class_heatmaps):
+                    alpha = 0.1
+                    overlap = alpha * self.images + colored_class_heatmap
+                    tf.summary.image(class_name, overlap, max_outputs=2)
 
         return overlap_output_input, reversed_image
 
