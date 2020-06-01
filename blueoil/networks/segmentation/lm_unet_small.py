@@ -32,11 +32,12 @@ class LmUnetSmall(SegnetBase):
         self.custom_getter = None
 
     def _get_lmnet_block(self, is_training, channels_data_format):
+        data_format = 'NHWC' if channels_data_format == 'channels_last' else 'NCHW'
         return functools.partial(conv_bn_act,
                                  weight_decay_rate=self.weight_decay_rate,
 				 activation=self.activation,
                                  is_training=is_training,
-                                 data_format=channels_data_format)
+                                 data_format=data_format)
 
     def _space_to_depth(self, inputs=None, block_size=2, name=''):
         if self.data_format != 'NHWC':
@@ -64,20 +65,20 @@ class LmUnetSmall(SegnetBase):
         down2 = self._space_to_depth(name='space2depth1', inputs=down1)
         down2 = block('conv2', down2, 64, 3)
         down2 = block('conv3', down2, 64, 3)
-        down3 = self._space_to_depth(name='space2depth2', inputs=x)
+        down3 = self._space_to_depth(name='space2depth2', inputs=down2)
         down3 = block('conv4', down3, 128, 3)
-        bottom = self._space_to_depth(name='space2depth3', inputs=x)
+        bottom = self._space_to_depth(name='space2depth3', inputs=down3)
         bottom = block('conv5', bottom, 256, 3)
         up1 = self._depth_to_space(name='depth2space1', inputs=bottom)
-	up1 = tf.concat([down3, up1], axis=-1)
-	up1 = block('conv6', up1, 128, 3)
+        up1 = tf.concat([down3, up1], axis=-1)
+        up1 = block('conv6', up1, 128, 3)
         up2 = self._depth_to_space(name='depth2space2', inputs=up1)
-	up2 = tf.concat([down2, up2], axis=-1)
-	up2 = block('conv7', up2, 64, 3)
-	up2 = block('conv8', up2, 64, 3)
+        up2 = tf.concat([down2, up2], axis=-1)
+        up2 = block('conv7', up2, 64, 3)
+        up2 = block('conv8', up2, 64, 3)
         up3 = self._depth_to_space(name='depth2space3', inputs=up2)
-	up3 = tf.concat([down1, up3], axis=-1)
-	up3 = block('conv9', up3, 32, 3)
+        up3 = tf.concat([down1, up3], axis=-1)
+        up3 = block('conv9', up3, 32, 3)
         x = block('conv10', up3, self.num_classes, 3)
         self._heatmap_layer = x
 

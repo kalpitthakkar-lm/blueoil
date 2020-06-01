@@ -38,7 +38,7 @@ from blueoil.quantizations import (
 
 IS_DEBUG = False
 
-NETWORK_CLASS = LmSegnetV1Quantize
+NETWORK_CLASS = LmUnetSmallQuantize
 DATASET_CLASS = DeepCrack
 
 # Hyperparameter to tune: Input size
@@ -76,10 +76,11 @@ POST_PROCESSOR = None
 NETWORK = EasyDict()
 # Hyperparameters to tune: Optim and LR / LR schedule
 NETWORK.OPTIMIZER_CLASS = tf.compat.v1.train.AdamOptimizer
-NETWORK.OPTIMIZER_KWARGS = {"learning_rate": 0.001}
+NETWORK.OPTIMIZER_KWARGS = {"learning_rate": 0.01}
 NETWORK.IMAGE_SIZE = IMAGE_SIZE
 NETWORK.BATCH_SIZE = BATCH_SIZE
 NETWORK.DATA_FORMAT = DATA_FORMAT
+NETWORK.WEIGHT_DECAY_RATE = 0.00005
 NETWORK.ACTIVATION_QUANTIZER = linear_mid_tread_half_quantizer
 NETWORK.ACTIVATION_QUANTIZER_KWARGS = {
     'bit': 2,
