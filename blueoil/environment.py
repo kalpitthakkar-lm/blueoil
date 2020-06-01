@@ -17,7 +17,7 @@ import os
 
 default_data_dir = "dataset"
 # DATA_DIR = os.getenv("DATA_DIR", os.path.join(os.getcwd(), default_data_dir))
-DATA_DIR = '/storage2/kalpitthakkar/semantic_seg_eizo'
+DATA_DIR = '/nfs01/dataset/users/kalpitthakkar/semantic_seg_eizo'
 
 default_output_dir = "saved"
 OUTPUT_DIR = os.getenv("OUTPUT_DIR", default_output_dir)

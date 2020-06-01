@@ -17,7 +17,7 @@ from easydict import EasyDict
 import tensorflow as tf
 
 from blueoil.common import Tasks
-from blueoil.networks.segmentation.lm_segnet_v1 import LmSegnetV1Quantize
+from blueoil.networks.segmentation.lm_segnet_9layers import LmSegnetV1Quantize
 from blueoil.datasets.crackdetection import DeepCrack
 from blueoil.data_processor import Sequence
 from blueoil.pre_processor import (
@@ -41,7 +41,9 @@ IS_DEBUG = False
 NETWORK_CLASS = LmSegnetV1Quantize
 DATASET_CLASS = DeepCrack
 
-IMAGE_SIZE = [360, 480]
+# Hyperparameter to tune: Input size
+IMAGE_SIZE = [320, 480]
+# Hyperparameter to tune: Batch size
 BATCH_SIZE = 4
 DATA_FORMAT = "NHWC"
 TASK = Tasks.SEMANTIC_SEGMENTATION
@@ -72,6 +74,7 @@ PRE_PROCESSOR = Sequence([
 POST_PROCESSOR = None
 
 NETWORK = EasyDict()
+# Hyperparameters to tune: Optim and LR / LR schedule
 NETWORK.OPTIMIZER_CLASS = tf.compat.v1.train.AdamOptimizer
 NETWORK.OPTIMIZER_KWARGS = {"learning_rate": 0.001}
 NETWORK.IMAGE_SIZE = IMAGE_SIZE
@@ -89,6 +92,7 @@ DATASET = EasyDict()
 DATASET.BATCH_SIZE = BATCH_SIZE
 DATASET.DATA_FORMAT = DATA_FORMAT
 DATASET.PRE_PROCESSOR = PRE_PROCESSOR
+# Lowest priority: Change augmentation args
 DATASET.AUGMENTOR = Sequence([
     Brightness((0.75, 1.25)),
     Color((0.75, 1.25)),
