@@ -63,19 +63,19 @@ class LmSegnetV1(SegnetBase):
 
         self.images = images
 
-        x = lmnet_block('conv1', images, 16, 1)
+        x = lmnet_block('conv1', images, 32, 1)
         x = self._space_to_depth(name='space2depth1', inputs=x)
         x = lmnet_block('conv2', x, 64, 3)
         x = self._space_to_depth(name='space2depth2', inputs=x)
         x = lmnet_block('conv3', x, 128, 3)
         x = self._space_to_depth(name='space2depth3', inputs=x)
-        x = lmnet_block('conv4', x, 256, 3)
-        x = lmnet_block('conv5', x, 512, 3)
+        x = lmnet_block('conv4', x, 128, 3)
+        x = lmnet_block('conv5', x, 256, 3)
         x = lmnet_block('conv6', x, 256, 3)
         x = self._depth_to_space(name='depth2space1', inputs=x)
         x = lmnet_block('conv7', x, 128, 3)
         x = self._depth_to_space(name='depth2space2', inputs=x)
-        x = lmnet_block('conv8', x, 64, 3)
+        x = lmnet_block('conv8', x, 128, 3)
         x = self._depth_to_space(name='depth2space3', inputs=x)
         x = lmnet_block('conv9', x, 32, 3)
         x = lmnet_block('conv10', x, self.num_classes, 3)

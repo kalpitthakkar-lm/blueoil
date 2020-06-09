@@ -76,7 +76,7 @@ POST_PROCESSOR = None
 NETWORK = EasyDict()
 # Hyperparameters to tune: Optim and LR / LR schedule
 NETWORK.OPTIMIZER_CLASS = tf.compat.v1.train.AdamOptimizer
-NETWORK.OPTIMIZER_KWARGS = {"learning_rate": 0.001}
+NETWORK.OPTIMIZER_KWARGS = {'learning_rate': 0.001}
 NETWORK.IMAGE_SIZE = IMAGE_SIZE
 NETWORK.BATCH_SIZE = BATCH_SIZE
 NETWORK.DATA_FORMAT = DATA_FORMAT
